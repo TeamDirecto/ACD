@@ -1,734 +1,552 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Control ACD AIMTI
-    </title>
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f3f4f6;
-            color: #222;
-        }
-
-        .header {
-            background: #ffffff;
-            border-bottom: 1px solid #dddddd;
-            padding: 22px 30px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-size: 26px;
-        }
-
-        .header p {
-            margin: 7px 0 0 0;
-            color: #666666;
-        }
-
-        .container {
-            max-width: 760px;
-            margin: 45px auto;
-            padding: 0 20px;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.10);
-        }
-
-        .field {
-            margin-bottom: 24px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 9px;
-        }
-
-        select {
-            width: 100%;
-            padding: 13px;
-            font-size: 16px;
-            border: 1px solid #cccccc;
-            border-radius: 6px;
-            background: #ffffff;
-        }
-
-        .current-box {
-            margin-top: 25px;
-            margin-bottom: 25px;
-            padding: 22px;
-            background: #f7f7f7;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .current-label {
-            font-size: 15px;
-            color: #666666;
-        }
-
-        .current-value {
-            margin-top: 8px;
-            font-size: 42px;
-            font-weight: bold;
-        }
-
-        .loading {
-            font-size: 18px;
-            color: #777777;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            border: 0;
-            border-radius: 7px;
-            font-size: 17px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        #applyButton {
-            margin-top: 10px;
-        }
-
-        button:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        #result {
-            display: none;
-            margin-top: 22px;
-            padding: 16px;
-            border-radius: 7px;
-            line-height: 1.5;
-        }
-
-        .success {
-            display: block !important;
-            background: #e7f6ea;
-            border: 1px solid #aad7b3;
-        }
-
-        .error {
-            display: block !important;
-            background: #fdeaea;
-            border: 1px solid #e3abab;
-        }
-
-        .info {
-            display: block !important;
-            background: #eef4ff;
-            border: 1px solid #b9ccec;
-        }
-
-        .note {
-            margin-top: 24px;
-            font-size: 13px;
-            color: #777777;
-            line-height: 1.5;
-        }
-
-    </style>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control ACD - AIMTI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f3f4f6;
+      color: #222;
+    }
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 22px 30px;
+    }
+    .header-row {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header h1 { margin: 0; font-size: 26px; }
+    .header p { margin: 7px 0 0; color: #666; }
+    .badge {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #fff3cd;
+      border: 1px solid #e4c45c;
+      color: #6d5100;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: .04em;
+    }
+    .container {
+      max-width: 760px;
+      margin: 45px auto;
+      padding: 0 20px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 3px 15px rgba(0, 0, 0, .10);
+    }
+    .service-box {
+      padding: 16px 18px;
+      background: #eef4ff;
+      border: 1px solid #b9ccec;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    .service-label {
+      color: #5b6472;
+      font-size: 13px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .service-name {
+      margin-top: 7px;
+      font-size: 19px;
+      font-weight: bold;
+    }
+    .auth-box {
+      padding: 18px;
+      background: #fffaf0;
+      border: 1px solid #e4c45c;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    .auth-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+    }
+    .auth-row input {
+      width: 100%;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    .auth-row button {
+      width: auto;
+      white-space: nowrap;
+      padding-left: 22px;
+      padding-right: 22px;
+    }
+    #logoutButton { background: #6c757d; }
+    #logoutButton:hover:not(:disabled) { background: #5c636a; }
+    [hidden] { display: none !important; }
+    .current-box {
+      margin: 25px 0;
+      padding: 22px;
+      background: #f7f7f7;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .current-label { font-size: 15px; color: #666; }
+    .current-value {
+      margin-top: 8px;
+      font-size: 42px;
+      font-weight: bold;
+    }
+    .loading { font-size: 18px; color: #777; }
+    .field { margin-bottom: 24px; }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 9px;
+    }
+    select {
+      width: 100%;
+      padding: 13px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 7px;
+      background: #146cda;
+      color: #fff;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: #0f5cbd; }
+    button:disabled { cursor: not-allowed; opacity: .5; }
+    #result {
+      display: none;
+      margin-top: 22px;
+      padding: 16px;
+      border-radius: 7px;
+      line-height: 1.5;
+    }
+    .success {
+      display: block !important;
+      background: #e7f6ea;
+      border: 1px solid #aad7b3;
+    }
+    .error {
+      display: block !important;
+      background: #fdeaea;
+      border: 1px solid #e3abab;
+    }
+    .info {
+      display: block !important;
+      background: #eef4ff;
+      border: 1px solid #b9ccec;
+    }
+    .note {
+      margin-top: 24px;
+      font-size: 13px;
+      color: #777;
+      line-height: 1.5;
+    }
+    @media (max-width: 600px) {
+      .header { padding: 18px 20px; }
+      .header-row { align-items: flex-start; flex-direction: column; }
+      .header h1 { font-size: 22px; }
+      .container { margin: 24px auto; padding: 0 12px; }
+      .card { padding: 22px; }
+      .auth-row { grid-template-columns: 1fr; }
+      .auth-row button { width: 100%; }
+    }
+  </style>
 </head>
-
-
 <body>
-
-
-<div class="header">
-
-    <h1>
-        Control de Nivel de Marcación ACD
-    </h1>
-
-    <p>
-        AIMTI Débito / AIMTI Crédito
-    </p>
-
-</div>
-
-
-<div class="container">
-
-    <div class="card">
-
-
-        <div class="field">
-
-            <label for="campaign">
-                Campaña
-            </label>
-
-            <select
-                id="campaign"
-                onchange="loadCurrentACD()"
-            >
-
-                <option value="91580">
-                    91580 - AIMTI DÉBITO
-                </option>
-
-                <option value="91581">
-                    91581 - AIMTI CRÉDITO
-                </option>
-
-
-		<option value="91583">
-                    91583 - AIMTI CAPACITACION
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <div class="current-box">
-
-            <div class="current-label">
-                Nivel ACD actual
-            </div>
-
-            <div
-                id="currentLevel"
-                class="current-value"
-            >
-                -
-            </div>
-
-            <div
-                id="currentStatus"
-                class="loading"
-            >
-                Consultando...
-            </div>
-
-        </div>
-
-
-        <div class="field">
-
-            <label for="acdLevel">
-                Nuevo nivel de marcación
-            </label>
-
-            <select id="acdLevel">
-
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-
-            </select>
-
-        </div>
-
-
-        <button
-            id="applyButton"
-            type="button"
-            onclick="applyACD()"
-            disabled
-        >
-            Aplicar cambio
-        </button>
-
-
-        <div id="result"></div>
-
-
-        <div class="note">
-
-            Solo se permiten niveles entre 1 y 8.
-            El backend también valida este límite,
-            aunque se intente manipular el navegador.
-
-        </div>
-
-
+  <header class="header">
+    <div class="header-row">
+      <div>
+        <h1>Control de Nivel de Marcación ACD</h1>
+        <p>AIMTI Débito / AIMTI Crédito / AIMTI Capacitación</p>
+      </div>
+      <span class="badge">ACCESO PROTEGIDO</span>
     </div>
+  </header>
 
-</div>
+  <main class="container">
+    <section class="card">
+      <div class="service-box">
+        <div class="service-label">Campaña autorizada</div>
+        <div class="field" style="margin: 10px 0 0;">
+          <label for="campaign">Campaña</label>
+          <select id="campaign">
+            <option value="91580">91580 — AIMTI DÉBITO</option>
+            <option value="91581">91581 — AIMTI CRÉDITO</option>
+            <option value="91583">91583 — AIMTI CAPACITACIÓN</option>
+          </select>
+        </div>
+      </div>
 
+      <div class="auth-box">
+        <label for="username">Acceso del cliente</label>
+        <div class="auth-row">
+          <input
+            id="username"
+            type="text"
+            autocomplete="username"
+            placeholder="Usuario"
+          >
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Contraseña"
+          >
+          <button id="loginButton" type="button">Iniciar sesión</button>
+          <button id="logoutButton" type="button" hidden>Cerrar sesión</button>
+        </div>
+      </div>
 
-<script>
+      <div class="current-box">
+        <div class="current-label">Nivel ACD actual</div>
+        <div id="currentLevel" class="current-value">-</div>
+        <div id="currentStatus" class="loading">Acceso requerido</div>
+      </div>
 
-const API_BASE = "/acd-api";
+      <div class="field">
+        <label for="acdLevel">Nuevo nivel de marcación</label>
+        <select id="acdLevel">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+        </select>
+      </div>
 
-let currentACD = null;
+      <button id="applyButton" type="button" disabled>Aplicar cambio</button>
+      <div id="result" role="status" aria-live="polite"></div>
 
+      <div class="note">
+        El backend valida la sesión, la campaña y el intervalo permitido de 1 a 8. La
+        sesión dura 15 minutos, se conserva únicamente en memoria y se elimina
+        al cerrar sesión o recargar.
+      </div>
+    </section>
+  </main>
 
-/* ==========================================================
-   MOSTRAR MENSAJE
-   ========================================================== */
+  <script>
+    const API_BASE = "https://vicidial97.directo.com/acd-api";
+    const MIN_ACD_LEVEL = 1;
+    const MAX_ACD_LEVEL = 8;
 
-function showMessage(
-    type,
-    message
-) {
+    let currentACD = null;
+    let accessToken = "";
+    let authorizedCampaigns = [];
 
-    const result =
-        document.getElementById(
-            "result"
+    const currentLevelElement = document.getElementById("currentLevel");
+    const currentStatusElement = document.getElementById("currentStatus");
+    const campaignElement = document.getElementById("campaign");
+    const acdLevelElement = document.getElementById("acdLevel");
+    const applyButton = document.getElementById("applyButton");
+    const loginButton = document.getElementById("loginButton");
+    const logoutButton = document.getElementById("logoutButton");
+    const usernameElement = document.getElementById("username");
+    const passwordElement = document.getElementById("password");
+    const resultElement = document.getElementById("result");
+
+    function showMessage(type, message) {
+      resultElement.className = type;
+      resultElement.textContent = message;
+    }
+
+    function clearMessage() {
+      resultElement.className = "";
+      resultElement.style.display = "none";
+      resultElement.textContent = "";
+    }
+
+    function getSelectedCampaign() {
+      return {
+        id: Number.parseInt(campaignElement.value, 10),
+        name: campaignElement.options[campaignElement.selectedIndex].text
+      };
+    }
+
+    async function readJsonResponse(response) {
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        const body = await response.text();
+        throw new Error(
+          "La API respondió contenido no JSON (HTTP " + response.status + ")."
+          + (body.startsWith("<!DOCTYPE") ? " Se recibió una página HTML." : "")
         );
+      }
 
-    result.className =
-        type;
+      return response.json();
+    }
 
-    result.textContent =
-        message;
+    function resetAuthInterface() {
+      accessToken = "";
+      authorizedCampaigns = [];
+      currentACD = null;
+      applyButton.disabled = true;
+      usernameElement.disabled = false;
+      passwordElement.disabled = false;
+      passwordElement.value = "";
+      loginButton.disabled = false;
+      loginButton.hidden = false;
+      loginButton.textContent = "Iniciar sesión";
+      logoutButton.hidden = true;
+      currentLevelElement.textContent = "-";
+      currentStatusElement.textContent = "Acceso requerido";
+    }
 
-}
+    async function loadCurrentACD() {
+      clearMessage();
+      currentACD = null;
+      applyButton.disabled = true;
+      currentLevelElement.textContent = "-";
+      currentStatusElement.textContent = "Consultando...";
 
+      if (!accessToken) {
+        currentStatusElement.textContent = "Acceso requerido";
+        showMessage("info", "Inicia sesión para consultar las campañas AIMTI.");
+        return false;
+      }
 
-/* ==========================================================
-   LIMPIAR MENSAJE
-   ========================================================== */
-
-function clearMessage() {
-
-    const result =
-        document.getElementById(
-            "result"
+      try {
+        const campaign = getSelectedCampaign();
+        const response = await fetch(
+          API_BASE + "/api/acd/" + campaign.id,
+          {
+            cache: "no-store",
+            headers: {
+              "Authorization": "Bearer " + accessToken
+            }
+          }
         );
+        const data = await readJsonResponse(response);
 
-    result.className =
-        "";
-
-    result.style.display =
-        "none";
-
-    result.textContent =
-        "";
-
-}
-
-
-/* ==========================================================
-   CONSULTAR NIVEL ACD ACTUAL
-   ========================================================== */
-
-async function loadCurrentACD() {
-
-    const campaignId =
-        parseInt(
-            document.getElementById(
-                "campaign"
-            ).value
-        );
-
-    const currentLevel =
-        document.getElementById(
-            "currentLevel"
-        );
-
-    const currentStatus =
-        document.getElementById(
-            "currentStatus"
-        );
-
-    const applyButton =
-        document.getElementById(
-            "applyButton"
-        );
-
-    const acdLevel =
-        document.getElementById(
-            "acdLevel"
-        );
-
-
-    clearMessage();
-
-    currentACD = null;
-
-    applyButton.disabled =
-        true;
-
-    currentLevel.textContent =
-        "-";
-
-    currentStatus.textContent =
-        "Consultando...";
-
-
-    try {
-
-        const response =
-            await fetch(
-                API_BASE
-                + "/api/acd/"
-                + campaignId,
-                {
-                    cache: "no-store"
-                }
-            );
-
-
-        const data =
-            await response.json();
-
+        if (response.status === 401) {
+          resetAuthInterface();
+        }
 
         if (!response.ok) {
-
-            throw new Error(
-                data.detail
-                ||
-                "Error consultando campaña"
-            );
-
+          throw new Error(data.detail || "Error consultando servicio");
         }
 
-
-        currentACD =
-            parseInt(
-                data.current_acd_level
-            );
-
-
-        currentLevel.textContent =
-            currentACD;
-
-
-        currentStatus.textContent =
-            data.campaign_name;
-
-
-        /*
-         * Dejamos seleccionado por defecto
-         * el mismo nivel actual.
-         */
+        currentACD = Number.parseInt(data.current_acd_level, 10);
+        currentLevelElement.textContent = currentACD;
+        currentStatusElement.textContent = data.campaign_name || campaign.name;
 
         if (
-            currentACD >= 1
-            &&
-            currentACD <= 8
+          Number.isInteger(currentACD)
+          && currentACD >= MIN_ACD_LEVEL
+          && currentACD <= MAX_ACD_LEVEL
         ) {
-
-            acdLevel.value =
-                String(
-                    currentACD
-                );
-
+          acdLevelElement.value = String(currentACD);
         }
 
-
-        applyButton.disabled =
-            false;
-
+        applyButton.disabled = false;
+        return true;
+      } catch (error) {
+        currentLevelElement.textContent = "?";
+        currentStatusElement.textContent = "No disponible";
+        showMessage("error", "Error consultando nivel actual: " + error.message);
+        return false;
+      }
     }
 
-    catch (error) {
+    async function login() {
+      const username = usernameElement.value.trim();
+      const password = passwordElement.value;
 
-        currentLevel.textContent =
-            "?";
-
-        currentStatus.textContent =
-            "No disponible";
-
-        showMessage(
-            "error",
-            "Error consultando nivel actual: "
-            + error.message
-        );
-
-    }
-
-}
-
-
-/* ==========================================================
-   APLICAR NUEVO NIVEL
-   ========================================================== */
-
-async function applyACD() {
-
-    const campaignSelect =
-        document.getElementById(
-            "campaign"
-        );
-
-    const acdSelect =
-        document.getElementById(
-            "acdLevel"
-        );
-
-    const applyButton =
-        document.getElementById(
-            "applyButton"
-        );
-
-
-    const campaignId =
-        parseInt(
-            campaignSelect.value
-        );
-
-
-    const campaignName =
-        campaignSelect
-        .options[
-            campaignSelect.selectedIndex
-        ]
-        .text;
-
-
-    const newLevel =
-        parseInt(
-            acdSelect.value
-        );
-
-
-    /*
-     * Validación adicional del navegador.
-     * El backend vuelve a validarlo.
-     */
-
-    if (
-        newLevel < 1
-        ||
-        newLevel > 8
-    ) {
-
-        showMessage(
-            "error",
-            "Nivel no permitido. "
-            + "Solo se acepta de 1 a 8."
-        );
-
+      if (!username || !password) {
+        showMessage("error", "Introduce usuario y contraseña.");
+        usernameElement.focus();
         return;
+      }
 
-    }
+      loginButton.disabled = true;
+      loginButton.textContent = "Validando...";
+      clearMessage();
 
-
-    if (currentACD === null) {
-
-        showMessage(
-            "error",
-            "No se pudo determinar "
-            + "el nivel actual."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Si selecciona exactamente
-     * el mismo valor actual.
-     */
-
-    if (newLevel === currentACD) {
-
-        const continueSame =
-            confirm(
-
-                campaignName
-                + "\n\n"
-                + "El nivel actual ya es "
-                + currentACD
-                + ".\n\n"
-                + "¿Deseas enviarlo "
-                + "de todas formas?"
-
-            );
-
-        if (!continueSame) {
-
-            return;
-
-        }
-
-    }
-
-    else {
-
-        const confirmed =
-            confirm(
-
-                "¿Confirmas el cambio?\n\n"
-                + campaignName
-                + "\n\n"
-                + "Nivel actual: "
-                + currentACD
-                + "\n"
-                + "Nuevo nivel: "
-                + newLevel
-
-            );
-
-        if (!confirmed) {
-
-            return;
-
-        }
-
-    }
-
-
-    applyButton.disabled =
-        true;
-
-
-    showMessage(
-        "info",
-        "Aplicando cambio..."
-    );
-
-
-    try {
-
-        const response =
-            await fetch(
-
-                API_BASE
-                + "/api/acd",
-
-                {
-
-                    method:
-                        "POST",
-
-                    headers: {
-
-                        "Content-Type":
-                            "application/json"
-
-                    },
-
-                    body:
-                        JSON.stringify({
-
-                            campaign_id:
-                                campaignId,
-
-                            acd_level:
-                                newLevel
-
-                        })
-
-                }
-
-            );
-
-
-        const data =
-            await response.json();
-
+      try {
+        const response = await fetch(API_BASE + "/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            password: password
+          })
+        });
+        const data = await readJsonResponse(response);
 
         if (!response.ok) {
-
-            throw new Error(
-                data.detail
-                ||
-                "Error aplicando cambio"
-            );
-
+          throw new Error(data.detail || "No fue posible iniciar sesión");
         }
 
+        accessToken = data.access_token;
+        authorizedCampaigns = Array.isArray(data.campaigns)
+          ? data.campaigns.map(Number)
+          : [];
 
-        /*
-         * El backend ya realizó:
-         *
-         * GET valor anterior
-         * PATCH
-         * GET valor posterior
-         *
-         * Por lo tanto este valor
-         * ya está verificado.
-         */
+        const selectedCampaign = getSelectedCampaign();
+        if (!authorizedCampaigns.includes(selectedCampaign.id)) {
+          throw new Error("El usuario no tiene acceso a las campañas AIMTI.");
+        }
+        passwordElement.value = "";
+        usernameElement.disabled = true;
+        passwordElement.disabled = true;
+        loginButton.hidden = true;
+        logoutButton.hidden = false;
 
-        currentACD =
-            parseInt(
-                data.acd_level
-            );
+        const loaded = await loadCurrentACD();
 
-
-        document.getElementById(
-            "currentLevel"
-        ).textContent =
-            currentACD;
-
-
-        acdSelect.value =
-            String(
-                currentACD
-            );
-
-
-        showMessage(
-            "success",
-            data.message
-        );
-
-
+        if (!loaded) {
+          resetAuthInterface();
+        }
+      } catch (error) {
+        accessToken = "";
+        authorizedCampaigns = [];
+        showMessage("error", "Error de acceso: " + error.message);
+        passwordElement.value = "";
+        passwordElement.focus();
+      } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = "Iniciar sesión";
+      }
     }
 
-    catch (error) {
+    async function logout() {
+      const tokenToRevoke = accessToken;
 
-        showMessage(
-            "error",
-            "Error: "
-            + error.message
-        );
+      resetAuthInterface();
+      clearMessage();
 
+      if (tokenToRevoke) {
+        try {
+          await fetch(API_BASE + "/api/auth/logout", {
+            method: "POST",
+            headers: {
+              "Authorization": "Bearer " + tokenToRevoke
+            }
+          });
+        } catch (error) {
+          // La sesión local ya fue eliminada.
+        }
+      }
+
+      showMessage("info", "Sesión cerrada.");
+      usernameElement.focus();
     }
 
-    finally {
+    async function applyACD() {
+      const campaign = getSelectedCampaign();
+      const newLevel = Number.parseInt(acdLevelElement.value, 10);
 
-        applyButton.disabled =
-            false;
+      if (
+        !Number.isInteger(newLevel)
+        || newLevel < MIN_ACD_LEVEL
+        || newLevel > MAX_ACD_LEVEL
+      ) {
+        showMessage("error", "Nivel no permitido. Solo se acepta de 1 a 8.");
+        return;
+      }
 
+      if (!Number.isInteger(currentACD)) {
+        showMessage("error", "No se pudo determinar el nivel actual.");
+        return;
+      }
+
+      const confirmed = window.confirm(
+        "¿Confirmas el cambio?\n\n"
+        + campaign.name + "\n\n"
+        + "Nivel actual: " + currentACD + "\n"
+        + "Nuevo nivel: " + newLevel
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      applyButton.disabled = true;
+      showMessage("info", "Aplicando cambio...");
+
+      try {
+        const response = await fetch(API_BASE + "/api/acd", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + accessToken
+          },
+          body: JSON.stringify({
+            campaign_id: campaign.id,
+            acd_level: newLevel
+          })
+        });
+        const data = await readJsonResponse(response);
+
+        if (response.status === 401) {
+          resetAuthInterface();
+        }
+
+        if (!response.ok) {
+          throw new Error(data.detail || "Error aplicando cambio");
+        }
+
+        currentACD = Number.parseInt(data.acd_level, 10);
+        currentLevelElement.textContent = currentACD;
+        acdLevelElement.value = String(currentACD);
+        showMessage("success", data.message || "Cambio aplicado y verificado.");
+      } catch (error) {
+        showMessage("error", "Error: " + error.message);
+      } finally {
+        applyButton.disabled = false;
+      }
     }
 
-}
-
-
-/* ==========================================================
-   CARGAR CAMPAÑA AL ABRIR
-   ========================================================== */
-
-window.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
+    applyButton.addEventListener("click", applyACD);
+    loginButton.addEventListener("click", login);
+    logoutButton.addEventListener("click", logout);
+    campaignElement.addEventListener("change", function () {
+      if (accessToken) {
         loadCurrentACD();
-
-    }
-);
-
-</script>
-
-
+      } else {
+        currentACD = null;
+        currentLevelElement.textContent = "-";
+        currentStatusElement.textContent = "Acceso requerido";
+        applyButton.disabled = true;
+      }
+    });
+    passwordElement.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        login();
+      }
+    });
+    window.addEventListener("DOMContentLoaded", function () {
+      usernameElement.focus();
+      loadCurrentACD();
+    });
+  </script>
 </body>
-
 </html>
