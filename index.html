@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Control ACD AIMTI
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f4f6;
+            color: #222;
+        }
+
+        .header {
+            background: #ffffff;
+            border-bottom: 1px solid #dddddd;
+            padding: 22px 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        .header p {
+            margin: 7px 0 0 0;
+            color: #666666;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.10);
+        }
+
+        .field {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 9px;
+        }
+
+        select {
+            width: 100%;
+            padding: 13px;
+            font-size: 16px;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+            background: #ffffff;
+        }
+
+        .current-box {
+            margin-top: 25px;
+            margin-bottom: 25px;
+            padding: 22px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .current-label {
+            font-size: 15px;
+            color: #666666;
+        }
+
+        .current-value {
+            margin-top: 8px;
+            font-size: 42px;
+            font-weight: bold;
+        }
+
+        .loading {
+            font-size: 18px;
+            color: #777777;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: 0;
+            border-radius: 7px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #applyButton {
+            margin-top: 10px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        #result {
+            display: none;
+            margin-top: 22px;
+            padding: 16px;
+            border-radius: 7px;
+            line-height: 1.5;
+        }
+
+        .success {
+            display: block !important;
+            background: #e7f6ea;
+            border: 1px solid #aad7b3;
+        }
+
+        .error {
+            display: block !important;
+            background: #fdeaea;
+            border: 1px solid #e3abab;
+        }
+
+        .info {
+            display: block !important;
+            background: #eef4ff;
+            border: 1px solid #b9ccec;
+        }
+
+        .note {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #777777;
+            line-height: 1.5;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+
+    <h1>
+        Control de Nivel de Marcación ACD
+    </h1>
+
+    <p>
+        AIMTI Débito / AIMTI Crédito
+    </p>
+
+</div>
+
+
+<div class="container">
+
+    <div class="card">
+
+
+        <div class="field">
+
+            <label for="campaign">
+                Campaña
+            </label>
+
+            <select
+                id="campaign"
+                onchange="loadCurrentACD()"
+            >
+
+                <option value="91580">
+                    91580 - AIMTI DÉBITO
+                </option>
+
+                <option value="91581">
+                    91581 - AIMTI CRÉDITO
+                </option>
+
+
+		<option value="91583">
+                    91583 - AIMTI CAPACITACION
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="current-box">
+
+            <div class="current-label">
+                Nivel ACD actual
+            </div>
+
+            <div
+                id="currentLevel"
+                class="current-value"
+            >
+                -
+            </div>
+
+            <div
+                id="currentStatus"
+                class="loading"
+            >
+                Consultando...
+            </div>
+
+        </div>
+
+
+        <div class="field">
+
+            <label for="acdLevel">
+                Nuevo nivel de marcación
+            </label>
+
+            <select id="acdLevel">
+
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            id="applyButton"
+            type="button"
+            onclick="applyACD()"
+            disabled
+        >
+            Aplicar cambio
+        </button>
+
+
+        <div id="result"></div>
+
+
+        <div class="note">
+
+            Solo se permiten niveles entre 1 y 8.
+            El backend también valida este límite,
+            aunque se intente manipular el navegador.
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+<script>
+
+const API_BASE = "/acd-api";
+
+let currentACD = null;
+
+
+/* ==========================================================
+   MOSTRAR MENSAJE
+   ========================================================== */
+
+function showMessage(
+    type,
+    message
+) {
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+    result.className =
+        type;
+
+    result.textContent =
+        message;
+
+}
+
+
+/* ==========================================================
+   LIMPIAR MENSAJE
+   ========================================================== */
+
+function clearMessage() {
+
+    const result =
+        document.getElementById(
+            "result"
+        );
+
+    result.className =
+        "";
+
+    result.style.display =
+        "none";
+
+    result.textContent =
+        "";
+
+}
+
+
+/* ==========================================================
+   CONSULTAR NIVEL ACD ACTUAL
+   ========================================================== */
+
+async function loadCurrentACD() {
+
+    const campaignId =
+        parseInt(
+            document.getElementById(
+                "campaign"
+            ).value
+        );
+
+    const currentLevel =
+        document.getElementById(
+            "currentLevel"
+        );
+
+    const currentStatus =
+        document.getElementById(
+            "currentStatus"
+        );
+
+    const applyButton =
+        document.getElementById(
+            "applyButton"
+        );
+
+    const acdLevel =
+        document.getElementById(
+            "acdLevel"
+        );
+
+
+    clearMessage();
+
+    currentACD = null;
+
+    applyButton.disabled =
+        true;
+
+    currentLevel.textContent =
+        "-";
+
+    currentStatus.textContent =
+        "Consultando...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                API_BASE
+                + "/api/acd/"
+                + campaignId,
+                {
+                    cache: "no-store"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail
+                ||
+                "Error consultando campaña"
+            );
+
+        }
+
+
+        currentACD =
+            parseInt(
+                data.current_acd_level
+            );
+
+
+        currentLevel.textContent =
+            currentACD;
+
+
+        currentStatus.textContent =
+            data.campaign_name;
+
+
+        /*
+         * Dejamos seleccionado por defecto
+         * el mismo nivel actual.
+         */
+
+        if (
+            currentACD >= 1
+            &&
+            currentACD <= 8
+        ) {
+
+            acdLevel.value =
+                String(
+                    currentACD
+                );
+
+        }
+
+
+        applyButton.disabled =
+            false;
+
+    }
+
+    catch (error) {
+
+        currentLevel.textContent =
+            "?";
+
+        currentStatus.textContent =
+            "No disponible";
+
+        showMessage(
+            "error",
+            "Error consultando nivel actual: "
+            + error.message
+        );
+
+    }
+
+}
+
+
+/* ==========================================================
+   APLICAR NUEVO NIVEL
+   ========================================================== */
+
+async function applyACD() {
+
+    const campaignSelect =
+        document.getElementById(
+            "campaign"
+        );
+
+    const acdSelect =
+        document.getElementById(
+            "acdLevel"
+        );
+
+    const applyButton =
+        document.getElementById(
+            "applyButton"
+        );
+
+
+    const campaignId =
+        parseInt(
+            campaignSelect.value
+        );
+
+
+    const campaignName =
+        campaignSelect
+        .options[
+            campaignSelect.selectedIndex
+        ]
+        .text;
+
+
+    const newLevel =
+        parseInt(
+            acdSelect.value
+        );
+
+
+    /*
+     * Validación adicional del navegador.
+     * El backend vuelve a validarlo.
+     */
+
+    if (
+        newLevel < 1
+        ||
+        newLevel > 8
+    ) {
+
+        showMessage(
+            "error",
+            "Nivel no permitido. "
+            + "Solo se acepta de 1 a 8."
+        );
+
+        return;
+
+    }
+
+
+    if (currentACD === null) {
+
+        showMessage(
+            "error",
+            "No se pudo determinar "
+            + "el nivel actual."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Si selecciona exactamente
+     * el mismo valor actual.
+     */
+
+    if (newLevel === currentACD) {
+
+        const continueSame =
+            confirm(
+
+                campaignName
+                + "\n\n"
+                + "El nivel actual ya es "
+                + currentACD
+                + ".\n\n"
+                + "¿Deseas enviarlo "
+                + "de todas formas?"
+
+            );
+
+        if (!continueSame) {
+
+            return;
+
+        }
+
+    }
+
+    else {
+
+        const confirmed =
+            confirm(
+
+                "¿Confirmas el cambio?\n\n"
+                + campaignName
+                + "\n\n"
+                + "Nivel actual: "
+                + currentACD
+                + "\n"
+                + "Nuevo nivel: "
+                + newLevel
+
+            );
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+    }
+
+
+    applyButton.disabled =
+        true;
+
+
+    showMessage(
+        "info",
+        "Aplicando cambio..."
+    );
+
+
+    try {
+
+        const response =
+            await fetch(
+
+                API_BASE
+                + "/api/acd",
+
+                {
+
+                    method:
+                        "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            campaign_id:
+                                campaignId,
+
+                            acd_level:
+                                newLevel
+
+                        })
+
+                }
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail
+                ||
+                "Error aplicando cambio"
+            );
+
+        }
+
+
+        /*
+         * El backend ya realizó:
+         *
+         * GET valor anterior
+         * PATCH
+         * GET valor posterior
+         *
+         * Por lo tanto este valor
+         * ya está verificado.
+         */
+
+        currentACD =
+            parseInt(
+                data.acd_level
+            );
+
+
+        document.getElementById(
+            "currentLevel"
+        ).textContent =
+            currentACD;
+
+
+        acdSelect.value =
+            String(
+                currentACD
+            );
+
+
+        showMessage(
+            "success",
+            data.message
+        );
+
+
+    }
+
+    catch (error) {
+
+        showMessage(
+            "error",
+            "Error: "
+            + error.message
+        );
+
+    }
+
+    finally {
+
+        applyButton.disabled =
+            false;
+
+    }
+
+}
+
+
+/* ==========================================================
+   CARGAR CAMPAÑA AL ABRIR
+   ========================================================== */
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        loadCurrentACD();
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
