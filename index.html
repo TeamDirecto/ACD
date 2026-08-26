@@ -62,11 +62,6 @@
       font-weight: bold;
       text-transform: uppercase;
     }
-    .service-name {
-      margin-top: 7px;
-      font-size: 19px;
-      font-weight: bold;
-    }
     .auth-box {
       padding: 18px;
       background: #fffaf0;
@@ -159,12 +154,6 @@
       background: #eef4ff;
       border: 1px solid #b9ccec;
     }
-    .note {
-      margin-top: 24px;
-      font-size: 13px;
-      color: #777;
-      line-height: 1.5;
-    }
     @media (max-width: 600px) {
       .header { padding: 18px 20px; }
       .header-row { align-items: flex-start; flex-direction: column; }
@@ -181,7 +170,7 @@
     <div class="header-row">
       <div>
         <h1>Control de Nivel de Marcación ACD</h1>
-        <p>AIMTI Débito / AIMTI Crédito / AIMTI Capacitación</p>
+        <p>Campañas AIMTI</p>
       </div>
       <span class="badge">ACCESO PROTEGIDO</span>
     </div>
@@ -194,9 +183,11 @@
         <div class="field" style="margin: 10px 0 0;">
           <label for="campaign">Campaña</label>
           <select id="campaign">
-            <option value="91580">91580 — AIMTI DÉBITO</option>
-            <option value="91581">91581 — AIMTI CRÉDITO</option>
-            <option value="91583">91583 — AIMTI CAPACITACIÓN</option>
+            <option value="91580">91580 — AIMTI DEBITO</option>
+            <option value="91581">91581 — AIMTI CREDITO</option>
+            <option value="91582">91582 — AIMTI WELLCOME CREDITO</option>
+            <option value="91583">91583 — AIMTI CAPACITACION</option>
+            <option value="91584">91584 — AIMTI RECUPERACION</option>
           </select>
         </div>
       </div>
@@ -204,18 +195,8 @@
       <div class="auth-box">
         <label for="username">Acceso del cliente</label>
         <div class="auth-row">
-          <input
-            id="username"
-            type="text"
-            autocomplete="username"
-            placeholder="Usuario"
-          >
-          <input
-            id="password"
-            type="password"
-            autocomplete="current-password"
-            placeholder="Contraseña"
-          >
+          <input id="username" type="text" autocomplete="username" placeholder="Usuario">
+          <input id="password" type="password" autocomplete="current-password" placeholder="Contraseña">
           <button id="loginButton" type="button">Iniciar sesión</button>
           <button id="logoutButton" type="button" hidden>Cerrar sesión</button>
         </div>
@@ -243,12 +224,6 @@
 
       <button id="applyButton" type="button" disabled>Aplicar cambio</button>
       <div id="result" role="status" aria-live="polite"></div>
-
-      <div class="note">
-        El backend valida la sesión, la campaña y el intervalo permitido de 1 a 8. La
-        sesión dura 15 minutos, se conserva únicamente en memoria y se elimina
-        al cerrar sesión o recargar.
-      </div>
     </section>
   </main>
 
@@ -335,6 +310,11 @@
 
       try {
         const campaign = getSelectedCampaign();
+
+        if (authorizedCampaigns.length && !authorizedCampaigns.includes(campaign.id)) {
+          throw new Error("El usuario no tiene acceso a esta campaña.");
+        }
+
         const response = await fetch(
           API_BASE + "/api/acd/" + campaign.id,
           {
@@ -394,10 +374,7 @@
         const response = await fetch(API_BASE + "/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: username,
-            password: password
-          })
+          body: JSON.stringify({ username, password })
         });
         const data = await readJsonResponse(response);
 
@@ -414,6 +391,7 @@
         if (!authorizedCampaigns.includes(selectedCampaign.id)) {
           throw new Error("El usuario no tiene acceso a las campañas AIMTI.");
         }
+
         passwordElement.value = "";
         usernameElement.disabled = true;
         passwordElement.disabled = true;
@@ -421,7 +399,6 @@
         logoutButton.hidden = false;
 
         const loaded = await loadCurrentACD();
-
         if (!loaded) {
           resetAuthInterface();
         }
@@ -478,6 +455,11 @@
         return;
       }
 
+      if (!accessToken) {
+        showMessage("error", "La sesión no está activa.");
+        return;
+      }
+
       const confirmed = window.confirm(
         "¿Confirmas el cambio?\n\n"
         + campaign.name + "\n\n"
@@ -521,7 +503,9 @@
       } catch (error) {
         showMessage("error", "Error: " + error.message);
       } finally {
-        applyButton.disabled = false;
+        if (accessToken) {
+          applyButton.disabled = false;
+        }
       }
     }
 
